@@ -1,0 +1,52 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: hostel-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: hostel
+      MYSQL_USER: hostel
+      MYSQL_PASSWORD: hostel_dev
+      MYSQL_ROOT_PASSWORD: root_dev
+    ports:
+      - '3306:3306'
+    volumes:
+      - hostel_mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-proot_dev',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  api:
+    build: .
+    container_name: hostel-api
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: hostel
+      DB_PASSWORD: hostel_dev
+      DB_DATABASE: hostel
+      TYPEORM_SYNC: 'false'
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  hostel_mysql_data:
