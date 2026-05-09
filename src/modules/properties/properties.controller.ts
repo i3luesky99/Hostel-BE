@@ -8,12 +8,18 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { PropertiesService } from './properties.service';
 
+@ApiBearerAuth('JWT-auth')
 @ApiTags('properties')
 @Controller('properties')
 export class PropertiesController {

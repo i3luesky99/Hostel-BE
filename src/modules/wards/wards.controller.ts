@@ -9,11 +9,17 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateWardDto } from './dto/create-ward.dto';
 import { UpdateWardDto } from './dto/update-ward.dto';
 import { WardsService } from './wards.service';
 
+@ApiBearerAuth('JWT-auth')
 @ApiTags('wards')
 @Controller('wards')
 export class WardsController {

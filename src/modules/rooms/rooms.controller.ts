@@ -8,19 +8,29 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { RoomsService } from './rooms.service';
 
+@ApiBearerAuth('JWT-auth')
 @ApiTags('rooms')
 @Controller('rooms')
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Tạo phòng' })
+  @ApiOperation({
+    summary: 'Tạo phòng',
+    description:
+      'Có thể gửi kèm `photos` (url, sortOrder?, isCover?) để tạo ảnh cùng lúc.',
+  })
   create(@Body() dto: CreateRoomDto) {
     return this.roomsService.create(dto);
   }
@@ -39,7 +49,11 @@ export class RoomsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Cập nhật phòng' })
+  @ApiOperation({
+    summary: 'Cập nhật phòng',
+    description:
+      'Nếu body có `photos`: thay toàn bộ ảnh của phòng; `photos: []` xóa hết ảnh. Không gửi `photos` = giữ ảnh hiện tại.',
+  })
   update(
     @Param('id', ParseBigIntIdPipe) id: string,
     @Body() dto: UpdateRoomDto,

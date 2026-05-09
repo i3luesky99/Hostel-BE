@@ -2,20 +2,14 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsInt,
-  IsNotEmpty,
-  IsNumberString,
   IsOptional,
   IsString,
   MaxLength,
   Min,
 } from 'class-validator';
 
-export class CreateRoomPhotoDto {
-  @ApiProperty({ example: '1' })
-  @IsNotEmpty()
-  @IsNumberString()
-  roomId: string;
-
+/** Ảnh phòng gửi kèm POST/PATCH /rooms (không có roomId — gắn theo phòng). */
+export class RoomPhotoInputDto {
   @ApiProperty({ example: 'https://cdn.example.com/r1.jpg' })
   @IsString()
   @MaxLength(512)

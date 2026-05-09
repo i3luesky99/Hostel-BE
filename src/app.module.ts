@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { TenantReadOnlyGuard } from './common/guards/tenant-readonly.guard';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './modules/auth/auth.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { DistrictsModule } from './modules/districts/districts.module';
 import { PropertiesModule } from './modules/properties/properties.module';
-import { RoomPhotosModule } from './modules/room-photos/room-photos.module';
 import { RoomsModule } from './modules/rooms/rooms.module';
 import { TenantProfilesModule } from './modules/tenant-profiles/tenant-profiles.module';
 import { UserRolesModule } from './modules/user-roles/user-roles.module';
@@ -24,6 +27,7 @@ function envFlag(value: string | undefined): boolean {
       isGlobal: true,
       envFilePath: '.env',
     }),
+    AuthModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -45,10 +49,14 @@ function envFlag(value: string | undefined): boolean {
     TenantProfilesModule,
     PropertiesModule,
     RoomsModule,
-    RoomPhotosModule,
     ContractsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Global guards run in registration order (see ContextCreator). JWT must run first so req.user exists.
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: TenantReadOnlyGuard },
+  ],
 })
 export class AppModule {}

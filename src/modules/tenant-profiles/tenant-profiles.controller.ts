@@ -7,12 +7,13 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
 import { CreateTenantProfileDto } from './dto/create-tenant-profile.dto';
 import { UpdateTenantProfileDto } from './dto/update-tenant-profile.dto';
 import { TenantProfilesService } from './tenant-profiles.service';
 
+@ApiBearerAuth('JWT-auth')
 @ApiTags('tenant-profiles')
 @Controller('tenant-profiles')
 export class TenantProfilesController {

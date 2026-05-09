@@ -29,7 +29,11 @@ services:
       retries: 10
       start_period: 15s
 
+  # Bật bằng: docker compose --profile api up -d --build
+  # Khi dev sửa code liên tục: KHÔNG dùng service này — chỉ chạy mysql + npm run start:dev (xem README / DOCKER.md).
   api:
+    profiles:
+      - api
     build: .
     container_name: hostel-api
     restart: unless-stopped

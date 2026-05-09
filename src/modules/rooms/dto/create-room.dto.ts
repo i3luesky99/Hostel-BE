@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -9,8 +11,10 @@ import {
   IsString,
   MaxLength,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { RoomStatus } from '../../../entities/enums';
+import { RoomPhotoInputDto } from './room-photo-input.dto';
 
 export class CreateRoomDto {
   @ApiProperty({ example: '1' })
@@ -57,4 +61,14 @@ export class CreateRoomDto {
   @IsOptional()
   @IsNumberString()
   depositAmount?: string | null;
+
+  @ApiPropertyOptional({
+    type: [RoomPhotoInputDto],
+    description: 'Danh sách ảnh (tùy chọn). Thứ tự mặc định theo index nếu không gửi sortOrder.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RoomPhotoInputDto)
+  photos?: RoomPhotoInputDto[];
 }

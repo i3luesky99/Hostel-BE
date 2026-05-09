@@ -22,11 +22,13 @@ npm install
 
 ## Chạy MySQL bằng Docker
 
-Chỉ database (phù hợp dev: Nest chạy trên máy, DB trong container):
+**Khuyến nghị khi dev (nhanh, không build image API mỗi lần sửa code):** chỉ database, Nest chạy trên máy (`npm run start:dev`):
 
 ```bash
 docker compose up -d mysql
 ```
+
+(`docker compose up -d` mặc định cũng chỉ khởi động MySQL; API trong Docker cần profile `api` — xem [DOCKER.md](./DOCKER.md).)
 
 Thông tin kết nối mặc định (trùng `.env.example`):
 
@@ -79,8 +81,7 @@ npm run start:dev
 | Role user | `/user-roles` (query `?userId=`) |
 | Hồ sơ người thuê | `/tenant-profiles` (khóa chính = `userId` trong URL) |
 | Cơ sở / dãy trọ | `/properties` (query `?ownerId=`) |
-| Phòng | `/rooms` (query `?propertyId=`) |
-| Ảnh phòng | `/room-photos` (query `?roomId=`) |
+| Phòng | `/rooms` (query `?propertyId=`; ảnh trong body `photos` khi POST/PATCH) |
 | Hợp đồng | `/contracts` |
 
 Mỗi nhóm hỗ trợ chuẩn **GET (list + :id), POST, PATCH/:id, DELETE/:id** (trừ khi ghi chú khác). Id kiểu `bigint` dùng chuỗi số (vd `1`, `2`).

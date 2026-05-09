@@ -2,13 +2,15 @@
 
 ## Chạy cả DB và API (Docker Compose)
 
-Từ thư mục project:
+Từ thư mục project (profile `api` — tránh nhầm với workflow dev chỉ DB):
 
 ```bash
-docker compose up --build
+docker compose --profile api up --build
 ```
 
-Hoặc nền: `docker compose up -d --build`
+Hoặc nền: `docker compose --profile api up -d --build`
+
+Mặc định **`docker compose up -d` không gồm service `api`** (chỉ MySQL), để dev có thể chạy Nest trên máy với `npm run start:dev` mà không build image mỗi lần sửa code.
 
 - **MySQL:** port `3306`, database `hostel`
 - **API:** port `3000` (http://localhost:3000)
