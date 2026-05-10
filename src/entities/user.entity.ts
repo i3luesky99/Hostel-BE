@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ContractOccupant } from './contract-occupant.entity';
 import { UserStatus } from './enums';
 import { Contract } from './contract.entity';
 import { Property } from './property.entity';
@@ -57,4 +58,7 @@ export class User {
 
   @OneToMany(() => Contract, (c) => c.owner)
   ownerContracts: Contract[];
+
+  @OneToMany(() => ContractOccupant, (co) => co.user)
+  contractOccupancies: ContractOccupant[];
 }

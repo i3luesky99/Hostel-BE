@@ -1,13 +1,21 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
   IsString,
   MaxLength,
+  ValidateNested,
 } from 'class-validator';
 import { ContractStatus } from '../../../entities/enums';
+import {
+  ContractCoTenantDto,
+  ContractRepresentativeDto,
+} from './contract-party.dto';
 
 export class CreateContractDto {
   @ApiProperty({ example: '1' })
@@ -15,15 +23,27 @@ export class CreateContractDto {
   @IsNumberString()
   roomId: string;
 
-  @ApiProperty({ example: '2' })
-  @IsNotEmpty()
-  @IsNumberString()
-  tenantUserId: string;
-
   @ApiProperty({ example: '1' })
   @IsNotEmpty()
   @IsNumberString()
   ownerUserId: string;
+
+  @ApiProperty({ type: ContractRepresentativeDto })
+  @ValidateNested()
+  @Type(() => ContractRepresentativeDto)
+  representative: ContractRepresentativeDto;
+
+  @ApiProperty({
+    type: [ContractCoTenantDto],
+    description:
+      'Ít nhất một người ở cùng; mỗi người luôn được tạo user + tenant (giống đại diện).',
+    minItems: 1,
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ContractCoTenantDto)
+  coTenants: ContractCoTenantDto[];
 
   @ApiProperty({ example: 'HD-2025-001' })
   @IsString()

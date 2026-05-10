@@ -4,10 +4,14 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 const DISTRICT_CODE = 'HCMC-Q1-DEMO';
 const OWNER_EMAIL = 'owner@demo.local';
 const TENANT_EMAIL = 'tenant@demo.local';
+const TENANT2_EMAIL = 'tenant2@demo.local';
+const TENANT3_EMAIL = 'tenant3@demo.local';
 const PROPERTY_NAME = 'Dãy trọ Demo Bến Nghé';
 const ROOM_CODE = 'DEMO-101';
 const CONTRACT_NO = 'HD-DEMO-001';
 const CITIZEN_ID = '079099014101';
+const CITIZEN_ID_2 = '079099014102';
+const CITIZEN_ID_3 = '079099014103';
 
 export class SeedSampleData1739126400000 implements MigrationInterface {
   name = 'SeedSampleData1739126400000';
@@ -51,7 +55,17 @@ export class SeedSampleData1739126400000 implements MigrationInterface {
     await queryRunner.query(
       `INSERT INTO users (email, password_hash, full_name, phone, status, created_at, updated_at)
        VALUES (?, ?, ?, ?, 'active', NOW(), NOW())`,
-      [TENANT_EMAIL, passwordHash, 'Người thuê Demo', '0909000002'],
+      [TENANT_EMAIL, passwordHash, 'Người thuê Demo (đại diện)', '0909000002'],
+    );
+    await queryRunner.query(
+      `INSERT INTO users (email, password_hash, full_name, phone, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, 'active', NOW(), NOW())`,
+      [TENANT2_EMAIL, passwordHash, 'Người thuê cùng Demo 2', '0909000003'],
+    );
+    await queryRunner.query(
+      `INSERT INTO users (email, password_hash, full_name, phone, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, 'active', NOW(), NOW())`,
+      [TENANT3_EMAIL, passwordHash, 'Người thuê cùng Demo 3', '0909000004'],
     );
 
     const [ownerRow] = await queryRunner.query(
@@ -62,12 +76,22 @@ export class SeedSampleData1739126400000 implements MigrationInterface {
       `SELECT id FROM users WHERE email = ?`,
       [TENANT_EMAIL],
     );
+    const [tenant2Row] = await queryRunner.query(
+      `SELECT id FROM users WHERE email = ?`,
+      [TENANT2_EMAIL],
+    );
+    const [tenant3Row] = await queryRunner.query(
+      `SELECT id FROM users WHERE email = ?`,
+      [TENANT3_EMAIL],
+    );
     const ownerId = ownerRow.id;
     const tenantId = tenantRow.id;
+    const tenant2Id = tenant2Row.id;
+    const tenant3Id = tenant3Row.id;
 
     await queryRunner.query(
-      `INSERT INTO user_roles (user_id, role) VALUES (?, 'owner'), (?, 'tenant')`,
-      [ownerId, tenantId],
+      `INSERT INTO user_roles (user_id, role) VALUES (?, 'owner'), (?, 'tenant'), (?, 'tenant'), (?, 'tenant')`,
+      [ownerId, tenantId, tenant2Id, tenant3Id],
     );
 
     await queryRunner.query(
@@ -90,7 +114,7 @@ export class SeedSampleData1739126400000 implements MigrationInterface {
 
     await queryRunner.query(
       `INSERT INTO rooms (property_id, room_code, floor, area_m2, max_occupancy, amenities, status, monthly_rent, deposit_amount)
-       VALUES (?, ?, 3, 18.50, 2, ?, 'available', 3500000.00, 7000000.00)`,
+       VALUES (?, ?, 3, 18.50, 3, ?, 'occupied', 3500000.00, 7000000.00)`,
       [
         propertyId,
         ROOM_CODE,
@@ -114,11 +138,32 @@ export class SeedSampleData1739126400000 implements MigrationInterface {
        VALUES (?, ?, ?, '2015-06-01', 'Cục CS QLHC về TTXH', NULL, NULL, NOW(), NOW())`,
       [tenantId, 'https://example.com/demo/tenant.jpg', CITIZEN_ID],
     );
+    await queryRunner.query(
+      `INSERT INTO tenant_profiles (user_id, photo_url, citizen_id, citizen_id_issue_date, citizen_id_issue_place, citizen_id_front_url, citizen_id_back_url, created_at, updated_at)
+       VALUES (?, NULL, ?, '2016-01-01', 'Cục CS QLHC về TTXH', NULL, NULL, NOW(), NOW())`,
+      [tenant2Id, CITIZEN_ID_2],
+    );
+    await queryRunner.query(
+      `INSERT INTO tenant_profiles (user_id, photo_url, citizen_id, citizen_id_issue_date, citizen_id_issue_place, citizen_id_front_url, citizen_id_back_url, created_at, updated_at)
+       VALUES (?, NULL, ?, '2017-03-15', 'Cục CS QLHC về TTXH', NULL, NULL, NOW(), NOW())`,
+      [tenant3Id, CITIZEN_ID_3],
+    );
 
     await queryRunner.query(
       `INSERT INTO contracts (room_id, tenant_user_id, owner_user_id, contract_no, start_date, end_date, monthly_rent, deposit_amount, status, signed_at, document_url, termination_reason, created_at)
        VALUES (?, ?, ?, ?, '2025-01-01', '2025-12-31', 3500000.00, 7000000.00, 'active', NOW(), NULL, NULL, NOW())`,
       [roomId, tenantId, ownerId, CONTRACT_NO],
+    );
+
+    const [contractRow] = await queryRunner.query(
+      `SELECT id FROM contracts WHERE contract_no = ?`,
+      [CONTRACT_NO],
+    );
+    const contractId = contractRow.id;
+
+    await queryRunner.query(
+      `INSERT INTO contract_occupants (contract_id, user_id) VALUES (?, ?), (?, ?)`,
+      [contractId, tenant2Id, contractId, tenant3Id],
     );
   }
 
@@ -143,16 +188,18 @@ export class SeedSampleData1739126400000 implements MigrationInterface {
       PROPERTY_NAME,
     ]);
     await queryRunner.query(
-      `DELETE FROM tenant_profiles WHERE citizen_id = ?`,
-      [CITIZEN_ID],
+      `DELETE FROM tenant_profiles WHERE citizen_id IN (?, ?, ?)`,
+      [CITIZEN_ID, CITIZEN_ID_2, CITIZEN_ID_3],
     );
     await queryRunner.query(
-      `DELETE ur FROM user_roles ur INNER JOIN users u ON u.id = ur.user_id WHERE u.email IN (?, ?)`,
-      [OWNER_EMAIL, TENANT_EMAIL],
+      `DELETE ur FROM user_roles ur INNER JOIN users u ON u.id = ur.user_id WHERE u.email IN (?, ?, ?, ?)`,
+      [OWNER_EMAIL, TENANT_EMAIL, TENANT2_EMAIL, TENANT3_EMAIL],
     );
-    await queryRunner.query(`DELETE FROM users WHERE email IN (?, ?)`, [
+    await queryRunner.query(`DELETE FROM users WHERE email IN (?, ?, ?, ?)`, [
       OWNER_EMAIL,
       TENANT_EMAIL,
+      TENANT2_EMAIL,
+      TENANT3_EMAIL,
     ]);
     await queryRunner.query(
       `DELETE w FROM wards w INNER JOIN districts d ON d.id = w.district_id WHERE d.code = ?`,

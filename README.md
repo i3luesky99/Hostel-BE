@@ -77,12 +77,11 @@ npm run start:dev
 |------|------------------|
 | Quận/huyện | `/districts` |
 | Phường/xã | `/wards` (query `?districtId=`) |
-| Người dùng | `/users` (không trả `password_hash`) |
-| Role user | `/user-roles` (query `?userId=`) |
+| Người dùng | `/users` — không trả password; `roles` trong body khi POST/PATCH (thay toàn bộ vai trò khi PATCH có `roles`) |
 | Hồ sơ người thuê | `/tenant-profiles` (khóa chính = `userId` trong URL) |
 | Cơ sở / dãy trọ | `/properties` (query `?ownerId=`) |
 | Phòng | `/rooms` (query `?propertyId=`; ảnh trong body `photos` khi POST/PATCH) |
-| Hợp đồng | `/contracts` |
+| Hợp đồng | `POST /contracts`: `representative` + `coTenants` (≥1); đại diện và mỗi người ở cùng đều tạo user tenant + mật khẩu trong `provisionedAccounts`. `PATCH` vẫn dùng `tenantUserId` / `occupantUserIds` nếu cần sửa bằng id. |
 
 Mỗi nhóm hỗ trợ chuẩn **GET (list + :id), POST, PATCH/:id, DELETE/:id** (trừ khi ghi chú khác). Id kiểu `bigint` dùng chuỗi số (vd `1`, `2`).
 
@@ -101,9 +100,11 @@ Mỗi nhóm hỗ trợ chuẩn **GET (list + :id), POST, PATCH/:id, DELETE/:id**
 | Vai trò      | Email               | Mật khẩu   |
 |-------------|---------------------|------------|
 | Chủ trọ     | `owner@demo.local`  | `Test@1234` |
-| Người thuê  | `tenant@demo.local` | `Test@1234` |
+| Người thuê (đại diện) | `tenant@demo.local`  | `Test@1234` |
+| Người thuê cùng phòng | `tenant2@demo.local` | `Test@1234` |
+| Người thuê cùng phòng | `tenant3@demo.local` | `Test@1234` |
 
-Hợp đồng mẫu: `HD-DEMO-001`. Dữ liệu địa lý demo dùng mã quận `HCMC-Q1-DEMO`.
+Hợp đồng mẫu: `HD-DEMO-001` (một đại diện + hai người trong `contract_occupants`). DB đã seed **trước** khi có roommates: chạy `npm run migration:run` để áp migration `SeedDemoRoommates`. Dữ liệu địa lý demo dùng mã quận `HCMC-Q1-DEMO`.
 
 ## Script npm thường dùng
 
@@ -122,7 +123,7 @@ Nếu Docker báo **WSL cần cập nhật**: mở PowerShell **Administrator**,
 ## Tài liệu thêm
 
 - [DOCKER.md](./DOCKER.md) — Compose, sync, migration, reset volume.
-- [docs/mysql-schema.png](./docs/mysql-schema.png) — sơ đồ bảng (minh họa).
+- [docs/mysql-schema.png](./docs/mysql-schema.png) — sơ đồ ER (minh họa). Nguồn: [docs/mysql-schema.mmd](./docs/mysql-schema.mmd); tạo lại PNG: `npx @mermaid-js/mermaid-cli -i docs/mysql-schema.mmd -o docs/mysql-schema.png`.
 
 ## License
 

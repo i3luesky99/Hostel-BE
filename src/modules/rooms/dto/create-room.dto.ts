@@ -64,7 +64,8 @@ export class CreateRoomDto {
 
   @ApiPropertyOptional({
     type: [RoomPhotoInputDto],
-    description: 'Danh sách ảnh (tùy chọn). Thứ tự mặc định theo index nếu không gửi sortOrder.',
+    description:
+      'Danh sách ảnh (tùy chọn). Thứ tự mặc định theo index nếu không gửi sortOrder.',
   })
   @IsOptional()
   @IsArray()

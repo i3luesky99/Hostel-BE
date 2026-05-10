@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMinSize,
+  IsArray,
   IsEmail,
   IsEnum,
   IsOptional,
@@ -7,7 +9,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UserStatus } from '../../../entities/enums';
+import { AppRole, UserStatus } from '../../../entities/enums';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'user@example.com' })
@@ -36,4 +38,10 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(UserStatus)
   status?: UserStatus;
+
+  @ApiProperty({ enum: AppRole, isArray: true, example: ['tenant'] })
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsEnum(AppRole, { each: true })
+  roles: AppRole[];
 }

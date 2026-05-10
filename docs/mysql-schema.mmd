@@ -1,0 +1,90 @@
+%% Hostel MySQL ER — regenerate PNG: npx @mermaid-js/mermaid-cli -i docs/mysql-schema.mmd -o docs/mysql-schema.png
+erDiagram
+  districts ||--o{ wards : has
+  districts ||--o{ properties : has
+  wards ||--o{ properties : has
+  users ||--o{ user_roles : has
+  users ||--o| tenant_profiles : has
+  users ||--o{ properties : owns
+  users ||--o{ contracts : signs
+  users ||--o{ contract_occupants : shares
+  properties ||--o{ rooms : has
+  rooms ||--o{ room_photos : has
+  rooms ||--o{ contracts : has
+  contracts ||--o{ contract_occupants : has
+
+  districts {
+    int id PK
+    string code
+    string name
+    string type
+  }
+
+  wards {
+    int id PK
+    int district_id FK
+    string name
+  }
+
+  users {
+    bigint id PK
+    string email
+    string password_hash
+    string full_name
+    string phone
+    string status
+  }
+
+  user_roles {
+    bigint id PK
+    bigint user_id FK
+    string role
+  }
+
+  tenant_profiles {
+    bigint user_id PK
+    string citizen_id
+    string photo_url
+  }
+
+  properties {
+    bigint id PK
+    bigint owner_id FK
+    string name
+    int district_id FK
+    int ward_id FK
+    string description
+  }
+
+  rooms {
+    bigint id PK
+    bigint property_id FK
+    string room_code
+    int max_occupancy
+    string status
+    string monthly_rent
+  }
+
+  room_photos {
+    bigint id PK
+    bigint room_id FK
+    string url
+    int sort_order
+    bool is_cover
+  }
+
+  contracts {
+    bigint id PK
+    bigint room_id FK
+    bigint tenant_user_id FK
+    bigint owner_user_id FK
+    string contract_no
+    string start_date
+    string status
+  }
+
+  contract_occupants {
+    bigint id PK
+    bigint contract_id FK
+    bigint user_id FK
+  }

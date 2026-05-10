@@ -4,8 +4,10 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ContractOccupant } from './contract-occupant.entity';
 import { ContractStatus } from './enums';
 import { Room } from './room.entity';
 import { User } from './user.entity';
@@ -19,6 +21,7 @@ export class Contract {
   @JoinColumn({ name: 'room_id' })
   room: Room;
 
+  /** Người đại diện ký hợp đồng (một hợp đồng chỉ một đại diện). */
   @ManyToOne(() => User, (u) => u.tenantContracts, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'tenant_user_id' })
   tenant: User;
@@ -75,4 +78,8 @@ export class Contract {
 
   @CreateDateColumn({ name: 'created_at', type: 'datetime' })
   createdAt: Date;
+
+  /** Người ở cùng (không gồm tenant đại diện). */
+  @OneToMany(() => ContractOccupant, (o) => o.contract, { cascade: false })
+  occupants: ContractOccupant[];
 }

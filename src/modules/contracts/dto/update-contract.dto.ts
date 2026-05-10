@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsArray,
   IsEnum,
   IsNumberString,
   IsOptional,
@@ -18,6 +19,16 @@ export class UpdateContractDto {
   @IsOptional()
   @IsNumberString()
   tenantUserId?: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Nếu gửi: thay toàn bộ danh sách người ở cùng; [] = xóa hết. Không gửi = giữ nguyên.',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumberString({}, { each: true })
+  occupantUserIds?: string[];
 
   @ApiPropertyOptional({ example: '1' })
   @IsOptional()

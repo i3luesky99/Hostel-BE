@@ -20,25 +20,35 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Tạo người dùng' })
+  @ApiOperation({
+    summary: 'Tạo người dùng',
+    description: 'Bắt buộc gửi `roles` (mảng AppRole: owner | tenant | admin).',
+  })
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Danh sách người dùng (không trả password)' })
+  @ApiOperation({
+    summary: 'Danh sách người dùng',
+    description: 'Không trả password; mỗi user có `roles`.',
+  })
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Chi tiết người dùng' })
+  @ApiOperation({ summary: 'Chi tiết người dùng (kèm roles)' })
   findOne(@Param('id', ParseBigIntIdPipe) id: string) {
     return this.usersService.findOnePublic(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Cập nhật người dùng' })
+  @ApiOperation({
+    summary: 'Cập nhật người dùng',
+    description:
+      'Gửi `roles` để thay toàn bộ vai trò; không gửi `roles` thì giữ vai trò cũ.',
+  })
   update(
     @Param('id', ParseBigIntIdPipe) id: string,
     @Body() dto: UpdateUserDto,

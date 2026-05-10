@@ -36,14 +36,22 @@ export class RoomsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Danh sách phòng' })
+  @ApiOperation({
+    summary: 'Danh sách phòng',
+    description:
+      'Nếu phòng có hợp đồng `active`, mỗi item có thêm `tenant`: `representative` (đại diện), `coTenants` (ở cùng).',
+  })
   @ApiQuery({ name: 'propertyId', required: false })
   findAll(@Query('propertyId') propertyId?: string) {
     return this.roomsService.findAll(propertyId);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Chi tiết phòng' })
+  @ApiOperation({
+    summary: 'Chi tiết phòng',
+    description:
+      'Có hợp đồng `active` → thêm `tenant` với `representative` và `coTenants`.',
+  })
   findOne(@Param('id', ParseBigIntIdPipe) id: string) {
     return this.roomsService.findOne(id);
   }

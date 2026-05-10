@@ -8,3 +8,4 @@ export * from './property.entity';
 export * from './room.entity';
 export * from './room-photo.entity';
 export * from './contract.entity';
+export * from './contract-occupant.entity';

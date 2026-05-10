@@ -1,5 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMinSize,
+  IsArray,
   IsEmail,
   IsEnum,
   IsOptional,
@@ -7,7 +9,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UserStatus } from '../../../entities/enums';
+import { AppRole, UserStatus } from '../../../entities/enums';
 
 export class UpdateUserDto {
   @ApiPropertyOptional()
@@ -42,4 +44,15 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(UserStatus)
   status?: UserStatus;
+
+  @ApiPropertyOptional({
+    enum: AppRole,
+    isArray: true,
+    description: 'Nếu gửi: thay toàn bộ vai trò của user (ít nhất một role).',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsEnum(AppRole, { each: true })
+  roles?: AppRole[];
 }

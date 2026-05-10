@@ -1,12 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { RoomStatus } from '../../entities/enums';
+import { In, Repository } from 'typeorm';
+import { Contract } from '../../entities/contract.entity';
+import { ContractStatus, RoomStatus } from '../../entities/enums';
 import { Property } from '../../entities/property.entity';
 import { RoomPhoto } from '../../entities/room-photo.entity';
 import { Room } from '../../entities/room.entity';
+import { User } from '../../entities/user.entity';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
+import type {
+  RoomCoTenantEntry,
+  RoomTenantPayload,
+  RoomTenantUserView,
+} from './types/room-tenant.types';
 
 @Injectable()
 export class RoomsService {
@@ -17,7 +24,77 @@ export class RoomsService {
     private readonly propertyRepo: Repository<Property>,
     @InjectRepository(RoomPhoto)
     private readonly photoRepo: Repository<RoomPhoto>,
+    @InjectRepository(Contract)
+    private readonly contractRepo: Repository<Contract>,
   ) {}
+
+  private toTenantUserView(user: User): RoomTenantUserView {
+    return {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      phone: user.phone,
+    };
+  }
+
+  private contractToTenantPayload(c: Contract): RoomTenantPayload {
+    const representative = this.toTenantUserView(c.tenant);
+    const coTenants: RoomCoTenantEntry[] =
+      c.occupants?.map((o) => ({
+        hasAccount: true as const,
+        ...this.toTenantUserView(o.user),
+      })) ?? [];
+    return {
+      contractId: c.id,
+      contractNo: c.contractNo,
+      representative,
+      coTenants,
+    };
+  }
+
+  /** Gắn block `tenant` khi có hợp đồng active trên phòng. */
+  private async attachTenantIfActive(
+    room: Room,
+  ): Promise<Room & { tenant?: RoomTenantPayload }> {
+    const contract = await this.contractRepo.findOne({
+      where: {
+        room: { id: room.id },
+        status: ContractStatus.ACTIVE,
+      },
+      relations: ['tenant', 'occupants', 'occupants.user'],
+      order: { id: 'DESC' },
+    });
+    const tenant = contract
+      ? this.contractToTenantPayload(contract)
+      : undefined;
+    return Object.assign(room, { tenant });
+  }
+
+  private async attachTenantForMany(
+    rooms: Room[],
+  ): Promise<Array<Room & { tenant?: RoomTenantPayload }>> {
+    if (!rooms.length) return [];
+    const ids = rooms.map((r) => r.id);
+    const contracts = await this.contractRepo.find({
+      where: {
+        room: { id: In(ids) },
+        status: ContractStatus.ACTIVE,
+      },
+      relations: ['tenant', 'occupants', 'occupants.user', 'room'],
+      order: { id: 'DESC' },
+    });
+    const bestByRoom = new Map<string, Contract>();
+    for (const c of contracts) {
+      const rid = c.room?.id;
+      if (rid == null) continue;
+      if (!bestByRoom.has(rid)) bestByRoom.set(rid, c);
+    }
+    return rooms.map((room) => {
+      const c = bestByRoom.get(room.id);
+      const tenant = c ? this.contractToTenantPayload(c) : undefined;
+      return Object.assign(room, { tenant });
+    });
+  }
 
   async create(dto: CreateRoomDto) {
     const property = await this.propertyRepo.findOne({
@@ -55,12 +132,22 @@ export class RoomsService {
     return this.findOne(saved.id);
   }
 
-  findAll(propertyId?: string) {
-    return this.roomRepo.find({
+  async findAll(propertyId?: string) {
+    const rooms = await this.roomRepo.find({
       where: propertyId ? { property: { id: propertyId } } : {},
       order: { id: 'ASC' },
       relations: ['property', 'photos'],
     });
+    for (const r of rooms) {
+      if (r.photos?.length) {
+        r.photos.sort((a, b) => {
+          const byOrder = a.sortOrder - b.sortOrder;
+          if (byOrder !== 0) return byOrder;
+          return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+        });
+      }
+    }
+    return this.attachTenantForMany(rooms);
   }
 
   async findOne(id: string) {
@@ -76,7 +163,7 @@ export class RoomsService {
         return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
       });
     }
-    return row;
+    return this.attachTenantIfActive(row);
   }
 
   async update(id: string, dto: UpdateRoomDto) {

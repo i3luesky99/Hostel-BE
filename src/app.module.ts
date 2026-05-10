@@ -12,7 +12,6 @@ import { DistrictsModule } from './modules/districts/districts.module';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { RoomsModule } from './modules/rooms/rooms.module';
 import { TenantProfilesModule } from './modules/tenant-profiles/tenant-profiles.module';
-import { UserRolesModule } from './modules/user-roles/user-roles.module';
 import { UsersModule } from './modules/users/users.module';
 import { WardsModule } from './modules/wards/wards.module';
 
@@ -45,7 +44,6 @@ function envFlag(value: string | undefined): boolean {
     DistrictsModule,
     WardsModule,
     UsersModule,
-    UserRolesModule,
     TenantProfilesModule,
     PropertiesModule,
     RoomsModule,

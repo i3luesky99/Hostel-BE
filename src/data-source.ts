@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import {
   Contract,
+  ContractOccupant,
   District,
   Property,
   Room,
@@ -32,6 +33,7 @@ export default new DataSource({
     Room,
     RoomPhoto,
     Contract,
+    ContractOccupant,
   ],
   migrations: [__dirname + '/migrations/*{.js,.ts}'],
   migrationsTableName: 'typeorm_migrations',
