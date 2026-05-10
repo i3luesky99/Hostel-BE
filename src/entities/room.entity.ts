@@ -23,18 +23,6 @@ export class Room {
   @Column({ name: 'room_code', length: 64 })
   roomCode: string;
 
-  @Column({ type: 'int', nullable: true })
-  floor: number | null;
-
-  @Column({
-    name: 'area_m2',
-    type: 'decimal',
-    precision: 8,
-    scale: 2,
-    nullable: true,
-  })
-  areaM2: string | null;
-
   @Column({
     name: 'max_occupancy',
     type: 'tinyint',
@@ -69,6 +57,25 @@ export class Room {
     nullable: true,
   })
   depositAmount: string | null;
+
+  @Column({
+    name: 'internet_fee_monthly',
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+  })
+  internetFeeMonthly: string | null;
+
+  /** Tiền dịch vụ cố định / tháng (chung chung: giữ xe, rác, …). */
+  @Column({
+    name: 'service_fee_monthly',
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+  })
+  serviceFeeMonthly: string | null;
 
   @OneToMany(() => RoomPhoto, (rp) => rp.room)
   photos: RoomPhoto[];

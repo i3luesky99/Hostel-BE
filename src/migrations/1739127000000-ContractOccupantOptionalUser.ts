@@ -18,9 +18,7 @@ async function dropContractOccupantForeignKeys(
   }
 }
 
-export class ContractOccupantOptionalUser1739127000000
-  implements MigrationInterface
-{
+export class ContractOccupantOptionalUser1739127000000 implements MigrationInterface {
   name = 'ContractOccupantOptionalUser1739127000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

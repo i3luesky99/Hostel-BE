@@ -7,8 +7,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { BillingPeriod } from './billing-period.entity';
 import { ContractOccupant } from './contract-occupant.entity';
 import { ContractStatus } from './enums';
+import { MeterReading } from './meter-reading.entity';
 import { Room } from './room.entity';
 import { User } from './user.entity';
 
@@ -82,4 +84,10 @@ export class Contract {
   /** Người ở cùng (không gồm tenant đại diện). */
   @OneToMany(() => ContractOccupant, (o) => o.contract, { cascade: false })
   occupants: ContractOccupant[];
+
+  @OneToMany(() => MeterReading, (m) => m.contract, { cascade: false })
+  meterReadings: MeterReading[];
+
+  @OneToMany(() => BillingPeriod, (b) => b.contract, { cascade: false })
+  billingPeriods: BillingPeriod[];
 }

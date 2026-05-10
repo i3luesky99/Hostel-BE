@@ -7,6 +7,7 @@ import { TenantReadOnlyGuard } from './common/guards/tenant-readonly.guard';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { BillingModule } from './modules/billing/billing.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { DistrictsModule } from './modules/districts/districts.module';
 import { PropertiesModule } from './modules/properties/properties.module';
@@ -48,6 +49,7 @@ function envFlag(value: string | undefined): boolean {
     PropertiesModule,
     RoomsModule,
     ContractsModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [

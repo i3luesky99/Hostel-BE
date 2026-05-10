@@ -42,9 +42,7 @@ async function hasUniqueContractOccupantUser(
   return rows[0]?.cnt > 0;
 }
 
-export class DropContractOccupantContactColumns1739127100000
-  implements MigrationInterface
-{
+export class DropContractOccupantContactColumns1739127100000 implements MigrationInterface {
   name = 'DropContractOccupantContactColumns1739127100000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -54,7 +52,11 @@ export class DropContractOccupantContactColumns1739127100000
     );
 
     const cols = await contractOccupantColumns(queryRunner);
-    for (const name of ['contact_email', 'contact_phone', 'display_full_name']) {
+    for (const name of [
+      'contact_email',
+      'contact_phone',
+      'display_full_name',
+    ]) {
       if (cols.has(name)) {
         await queryRunner.query(
           `ALTER TABLE contract_occupants DROP COLUMN \`${name}\``,

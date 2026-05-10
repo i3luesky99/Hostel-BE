@@ -12,6 +12,8 @@ erDiagram
   rooms ||--o{ room_photos : has
   rooms ||--o{ contracts : has
   contracts ||--o{ contract_occupants : has
+  contracts ||--o{ meter_readings : has
+  contracts ||--o{ billing_periods : has
 
   districts {
     int id PK
@@ -63,6 +65,8 @@ erDiagram
     int max_occupancy
     string status
     string monthly_rent
+    string internet_fee_monthly
+    string service_fee_monthly
   }
 
   room_photos {
@@ -87,4 +91,27 @@ erDiagram
     bigint id PK
     bigint contract_id FK
     bigint user_id FK
+  }
+
+  meter_readings {
+    bigint id PK
+    bigint contract_id FK
+    string utility_type
+    date reading_at
+    string index_value
+    string photo_url
+  }
+
+  billing_periods {
+    bigint id PK
+    bigint contract_id FK
+    int period_year
+    int period_month
+    string electricity_amount
+    string water_amount
+    string internet_fee
+    string service_fee
+    string rent_amount
+    string total_due
+    string status
   }

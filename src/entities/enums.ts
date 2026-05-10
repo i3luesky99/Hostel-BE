@@ -23,3 +23,16 @@ export enum ContractStatus {
   EXPIRED = 'expired',
   TERMINATED = 'terminated',
 }
+
+/** Chỉ số công tơ — nguồn sự thật theo hợp đồng. */
+export enum UtilityType {
+  ELECTRICITY = 'electricity',
+  WATER = 'water',
+}
+
+/** Bản chốt sổ tiền theo tháng (contract). */
+export enum BillingPeriodStatus {
+  DRAFT = 'draft',
+  FINALIZED = 'finalized',
+  PAID = 'paid',
+}

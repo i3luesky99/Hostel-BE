@@ -3,11 +3,11 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
-  IsInt,
   IsNotEmpty,
   IsNumberString,
   IsObject,
   IsOptional,
+  IsInt,
   IsString,
   MaxLength,
   Min,
@@ -26,16 +26,6 @@ export class CreateRoomDto {
   @IsString()
   @MaxLength(64)
   roomCode: string;
-
-  @ApiPropertyOptional({ example: 2 })
-  @IsOptional()
-  @IsInt()
-  floor?: number | null;
-
-  @ApiPropertyOptional({ example: '20.5' })
-  @IsOptional()
-  @IsNumberString()
-  areaM2?: string | null;
 
   @ApiPropertyOptional({ example: 2, default: 1 })
   @IsOptional()
@@ -61,6 +51,22 @@ export class CreateRoomDto {
   @IsOptional()
   @IsNumberString()
   depositAmount?: string | null;
+
+  @ApiPropertyOptional({
+    example: '100000.00',
+    description: 'Tiền internet cố định / tháng (niêm yết phòng).',
+  })
+  @IsOptional()
+  @IsNumberString()
+  internetFeeMonthly?: string | null;
+
+  @ApiPropertyOptional({
+    example: '50000.00',
+    description: 'Tiền dịch vụ cố định / tháng.',
+  })
+  @IsOptional()
+  @IsNumberString()
+  serviceFeeMonthly?: string | null;
 
   @ApiPropertyOptional({
     type: [RoomPhotoInputDto],

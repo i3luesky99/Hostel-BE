@@ -80,10 +80,14 @@ npm run start:dev
 | Người dùng | `/users` — không trả password; `roles` trong body khi POST/PATCH (thay toàn bộ vai trò khi PATCH có `roles`) |
 | Hồ sơ người thuê | `/tenant-profiles` (khóa chính = `userId` trong URL) |
 | Cơ sở / dãy trọ | `/properties` (query `?ownerId=`) |
-| Phòng | `/rooms` (query `?propertyId=`; ảnh trong body `photos` khi POST/PATCH) |
+| Phòng | `/rooms` (query `?propertyId=`). Body gồm `monthlyRent`, optional `depositAmount`, `internetFeeMonthly`, `serviceFeeMonthly` (tiền cố định/tháng), `photos` khi POST/PATCH. |
 | Hợp đồng | `POST /contracts`: `representative` + `coTenants` (≥1); đại diện và mỗi người ở cùng đều tạo user tenant + mật khẩu trong `provisionedAccounts`. `PATCH` vẫn dùng `tenantUserId` / `occupantUserIds` nếu cần sửa bằng id. |
+| Chỉ số công tơ | `meter_readings`: **nguồn sự thật** — REST lồng `contracts/:contractId/meter-readings` (POST/GET/PATCH/DELETE). Mỗi lần đọc điện/nước một dòng (`utilityType`, `readingAt`, `indexValue`). |
+| Kỳ thanh toán | `billing_periods`: **chốt sổ theo tháng** — `contracts/:contractId/billing-periods` (POST/GET/PATCH/DELETE). Một kỳ = `(periodYear, periodMonth)` duy nhất / hợp đồng; có chỉ số chốt, tiền điện/nước/internet/dịch vụ/thuê, `totalDue`, `status` (`draft` → `finalized` → `paid`). Sau migration, hợp đồng demo `HD-DEMO-001` có sẵn 2 kỳ **2026-04** và **2026-05** để so sánh. |
 
 Mỗi nhóm hỗ trợ chuẩn **GET (list + :id), POST, PATCH/:id, DELETE/:id** (trừ khi ghi chú khác). Id kiểu `bigint` dùng chuỗi số (vd `1`, `2`).
+
+**Schema ER (PNG):** sinh lại từ `docs/mysql-schema.mmd` bằng `npx @mermaid-js/mermaid-cli -i docs/mysql-schema.mmd -o docs/mysql-schema.png`.
 
 ### Biến môi trường quan trọng
 

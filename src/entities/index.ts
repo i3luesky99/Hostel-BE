@@ -9,3 +9,5 @@ export * from './room.entity';
 export * from './room-photo.entity';
 export * from './contract.entity';
 export * from './contract-occupant.entity';
+export * from './meter-reading.entity';
+export * from './billing-period.entity';

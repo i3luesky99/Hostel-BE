@@ -2,9 +2,11 @@ import 'reflect-metadata';
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import {
+  BillingPeriod,
   Contract,
   ContractOccupant,
   District,
+  MeterReading,
   Property,
   Room,
   RoomPhoto,
@@ -34,6 +36,8 @@ export default new DataSource({
     RoomPhoto,
     Contract,
     ContractOccupant,
+    MeterReading,
+    BillingPeriod,
   ],
   migrations: [__dirname + '/migrations/*{.js,.ts}'],
   migrationsTableName: 'typeorm_migrations',

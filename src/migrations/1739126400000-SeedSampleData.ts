@@ -113,8 +113,8 @@ export class SeedSampleData1739126400000 implements MigrationInterface {
     const propertyId = propRow.id;
 
     await queryRunner.query(
-      `INSERT INTO rooms (property_id, room_code, floor, area_m2, max_occupancy, amenities, status, monthly_rent, deposit_amount)
-       VALUES (?, ?, 3, 18.50, 3, ?, 'occupied', 3500000.00, 7000000.00)`,
+      `INSERT INTO rooms (property_id, room_code, max_occupancy, amenities, status, monthly_rent, deposit_amount, internet_fee_monthly, service_fee_monthly)
+       VALUES (?, ?, 3, ?, 'occupied', 3500000.00, 7000000.00, 100000.00, 50000.00)`,
       [
         propertyId,
         ROOM_CODE,

@@ -105,13 +105,13 @@ export class RoomsService {
 
     const row = this.roomRepo.create({
       roomCode: dto.roomCode,
-      floor: dto.floor ?? null,
-      areaM2: dto.areaM2 ?? null,
       maxOccupancy: dto.maxOccupancy ?? 1,
       amenities: dto.amenities ?? null,
       status: dto.status ?? RoomStatus.AVAILABLE,
       monthlyRent: dto.monthlyRent,
       depositAmount: dto.depositAmount ?? null,
+      internetFeeMonthly: dto.internetFeeMonthly ?? null,
+      serviceFeeMonthly: dto.serviceFeeMonthly ?? null,
       property: { id: dto.propertyId } as Property,
     });
     const saved = await this.roomRepo.save(row);
@@ -179,14 +179,18 @@ export class RoomsService {
       room.property = property;
     }
     if (dto.roomCode !== undefined) room.roomCode = dto.roomCode;
-    if (dto.floor !== undefined) room.floor = dto.floor ?? null;
-    if (dto.areaM2 !== undefined) room.areaM2 = dto.areaM2 ?? null;
     if (dto.maxOccupancy !== undefined) room.maxOccupancy = dto.maxOccupancy;
     if (dto.amenities !== undefined) room.amenities = dto.amenities ?? null;
     if (dto.status !== undefined) room.status = dto.status;
     if (dto.monthlyRent !== undefined) room.monthlyRent = dto.monthlyRent;
     if (dto.depositAmount !== undefined)
       room.depositAmount = dto.depositAmount ?? null;
+    if (dto.internetFeeMonthly !== undefined) {
+      room.internetFeeMonthly = dto.internetFeeMonthly ?? null;
+    }
+    if (dto.serviceFeeMonthly !== undefined) {
+      room.serviceFeeMonthly = dto.serviceFeeMonthly ?? null;
+    }
 
     await this.roomRepo.manager.transaction(async (mgr) => {
       await mgr.save(Room, room);

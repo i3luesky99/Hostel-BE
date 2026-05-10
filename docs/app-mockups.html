@@ -290,12 +290,127 @@
       line-height: 1.6;
     }
     .palette-ref strong { color: #F8F9FC; }
+    .palette-ref code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; }
+
+    .bill-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .bill-row:last-child { border-bottom: none; }
+    .bill-row strong { color: var(--text-primary); font-weight: 600; }
+
+    /* Chart mock — filter Điện / Nước / Tiền */
+    .chart-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .chart-filters button {
+      flex: 1;
+      min-width: 72px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .chart-filters button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .chart-filters button[data-series="electricity"].active { background: #C4A35A; border-color: #C4A35A; }
+    .chart-filters button[data-series="water"].active { background: #6B9BD1; border-color: #6B9BD1; }
+    .chart-filters button[data-series="money"].active { background: #5A9B8A; border-color: #5A9B8A; }
+
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .chart-legend span { display: flex; align-items: center; gap: 5px; }
+    .chart-legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+    .lg-e { background: #D9C06A; }
+    .lg-w { background: #8EB4E3; }
+    .lg-m { background: #7CB5A7; }
+
+    .chart-area {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 10px 8px;
+    }
+    .chart-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 6px;
+      height: 140px;
+      padding-top: 8px;
+    }
+    .chart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .chart-stacks {
+      flex: 1;
+      width: 100%;
+      max-width: 36px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 3px;
+      align-self: stretch;
+    }
+    .chart-bar-seg {
+      width: 10px;
+      border-radius: 4px 4px 0 0;
+      min-height: 4px;
+      transition: opacity 0.15s ease;
+    }
+    .chart-bar-seg[data-series="electricity"] { background: linear-gradient(180deg, #E8D089, #C4A35A); }
+    .chart-bar-seg[data-series="water"] { background: linear-gradient(180deg, #B8D4F0, #6B9BD1); }
+    .chart-bar-seg[data-series="money"] { background: linear-gradient(180deg, #9DC9B8, #5A9B8A); }
+    .chart-bar-seg.dimmed { opacity: 0.12; }
+    .chart-col-label {
+      font-size: 0.62rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .chart-caption {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      margin-top: 10px;
+      line-height: 1.45;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <div class="page-header">
     <h1>Hostel — wireframe xem trước</h1>
-    <p>Khung 375×812 · bám ERD <code>docs/mysql-schema.png</code>: users, user_roles, tenant_profiles (citizen_id, photo_url), districts, wards, properties (name, district, ward, description), rooms (room_code, max_occupancy, status, monthly_rent), room_photos, contracts (contract_no, start_date, status), contract_occupants</p>
+    <p>Khung 375×812 · bám <strong>src/entities</strong> + migration <code>RoomFeesMeterBilling</code>: thêm <code>rooms.internet_fee_monthly</code>, <code>service_fee_monthly</code>; bảng <code>meter_readings</code> (contract_id, utility_type electricity|water, reading_at, index_value, photo_url, notes); <code>billing_periods</code> (kỳ year/month, chỉ số điện/nước, phí, rent snapshot, total_due, status draft|finalized|paid). API: <code>contracts/:contractId/meter-readings</code>, <code>contracts/:contractId/billing-periods</code>.</p>
     <div class="tabs">
       <button type="button" class="active" data-panel="tenant">Tenant</button>
       <button type="button" data-panel="owner">Owner</button>
@@ -307,6 +422,7 @@
     primary <code>#6B7FD7</code> · primaryLight <code>#92A3E8</code> · background <code>#F3F5FA</code> · surface <code>#FFFFFF</code> ·
     text <code>#3D4456</code> / <code>#868D9E</code> · border <code>#E2E6EF</code> · success <code>#5A9B8A</code> · warning <code>#C4A35A</code> ·
     danger <code>#C17B7B</code> · inactive <code>#A8ADB8</code> · canvas <code>#3D4456</code>
+    <br /><strong>REST (Swagger tags):</strong> <code>meter-readings</code> · <code>billing-periods</code> — nested under <code>contracts/:contractId/…</code>
   </div>
 
   <div id="tenant" class="panel active">
@@ -338,7 +454,9 @@
               <div class="card">
                 <h3>Phòng đang thuê</h3>
                 <p>Phòng 302 · Tòa Bình Thạnh</p>
-                <p style="margin-top:6px"><span class="chip chip-success">HĐ active</span> <span style="color:var(--text-secondary);font-size:0.8rem">Giá phòng 5,5tr (rooms.monthly_rent)</span></p>
+                <p style="margin-top:6px"><span class="chip chip-success">HĐ active</span></p>
+                <p style="margin-top:8px;font-size:0.78rem;color:var(--text-secondary);line-height:1.45">Tiền phòng 5,5tr · Wifi +100k · DV +50k <span style="opacity:0.85">(rooms + snapshot billing_periods)</span></p>
+                <button type="button" class="btn btn-ghost" style="margin-top:10px">Kỳ thanh toán tháng này</button>
               </div>
               <button type="button" class="btn btn-primary">Tìm phòng trống</button>
               <p style="font-size:0.8rem;color:var(--text-secondary);margin:12px 0 6px">Gợi ý (theo quận/phường)</p>
@@ -370,6 +488,7 @@
                 <div>
                   <h3 style="margin:0 0 4px;font-size:0.9rem">Phòng 201 · Tòa A</h3>
                   <p>4,5tr · tối đa 2 người · Q.1</p>
+                  <p style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px">+Wifi · +DV (internet_fee_monthly · service_fee_monthly)</p>
                   <span class="chip chip-success">Còn trống</span>
                 </div>
               </div>
@@ -378,7 +497,8 @@
                 <div>
                   <h3 style="margin:0 0 4px;font-size:0.9rem">Phòng 105 · Tòa B</h3>
                   <p>3,8tr · tối đa 1 người · Thủ Đức</p>
-                  <span class="chip chip-muted">Đang có người</span>
+                  <p style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px">Phí cố định theo phòng (nếu có)</p>
+                  <span class="chip chip-muted">occupied</span>
                 </div>
               </div>
             </div>
@@ -402,7 +522,17 @@
               </div>
               <h3 style="margin:0 0 4px">Phòng 201</h3>
               <p>4,5tr/tháng · tối đa 2 người · <span class="chip chip-success">available</span></p>
-              <p style="font-size:0.75rem;color:var(--text-secondary);margin-top:8px">rooms: room_code · max_occupancy · status · monthly_rent</p>
+              <div class="card" style="margin-top:12px;margin-bottom:0">
+                <h3>Phí cố định / tháng (rooms)</h3>
+                <div class="bill-row"><span>Cọc (deposit_amount)</span><strong>4,5tr</strong></div>
+                <div class="bill-row"><span>Wifi</span><strong>100.000</strong></div>
+                <div class="bill-row"><span>Dịch vụ</span><strong>50.000</strong></div>
+              </div>
+              <div class="card" style="margin-top:12px">
+                <h3>amenities (JSON)</h3>
+                <p>Máy lạnh · Nóng lạnh — có thể hiển thị key/value</p>
+              </div>
+              <p style="font-size:0.72rem;color:var(--text-secondary);margin-top:8px">Chỉ số điện/nước: gắn <strong>contract</strong> · meter_readings (sau khi có HĐ)</p>
               <button type="button" class="btn btn-ghost">Chi tiết nhà trọ (property)</button>
             </div>
           </div>
@@ -417,14 +547,14 @@
             <div class="nav-bar"><span class="back">←</span><span class="title">Tòa Bình Thạnh</span></div>
             <div class="content">
               <div class="card">
-                <h3>Vị trí</h3>
-                <p>district_id · ward_id (districts · wards)</p>
+                <h3>Địa chỉ</h3>
+                <p>address_line · district · ward</p>
               </div>
               <div class="card">
                 <h3>Mô tả</h3>
                 <p>properties.description — khu yên tĩnh, gần chợ…</p>
               </div>
-              <p style="font-size:0.75rem;color:var(--text-secondary)">properties: name · owner_id · district_id · ward_id · description</p>
+              <p style="font-size:0.75rem;color:var(--text-secondary)">properties (entity): name · address_line · district · ward · lat/lng · description</p>
               <button type="button" class="btn btn-primary">Xem danh sách phòng</button>
             </div>
           </div>
@@ -441,7 +571,8 @@
               <div class="card">
                 <h3>HĐ-2026-00142</h3>
                 <p>Bắt đầu 01/03/2026 · Phòng 302</p>
-                <span class="chip chip-success">active</span>
+                <p style="margin-top:6px;font-size:0.75rem;color:var(--text-secondary)">Kỳ 5/2026 · <span class="chip chip-warning">draft</span> · tổng —</p>
+                <span class="chip chip-success" style="margin-top:8px;display:inline-block">active</span>
               </div>
               <div class="card">
                 <h3>HĐ-2025-00901</h3>
@@ -464,16 +595,142 @@
             <div class="nav-bar"><span class="back">←</span><span class="title">HĐ-2026-00142</span></div>
             <div class="content">
               <div class="card">
-                <p><strong>contracts</strong><br />contract_no · start_date · status</p>
-                <p style="margin-top:8px"><strong>Liên kết</strong><br />room_id · tenant_user_id (đại diện) · owner_user_id</p>
+                <p><strong>Hợp đồng</strong></p>
+                <div class="bill-row"><span>contract_no</span><strong>HĐ-2026-00142</strong></div>
+                <div class="bill-row"><span>start_date → end_date</span><strong>01/03/26 → …</strong></div>
+                <div class="bill-row"><span>monthly_rent · deposit</span><strong>5,5tr · 5,5tr</strong></div>
+                <div class="bill-row"><span>signed_at</span><strong>15/03/2026</strong></div>
+                <div class="bill-row"><span>document_url</span><strong>PDF</strong></div>
               </div>
-              <div class="card">
+              <button type="button" class="btn btn-primary">Kỳ thanh toán (billing_periods)</button>
+              <button type="button" class="btn btn-ghost">Biểu đồ điện · nước · tiền</button>
+              <button type="button" class="btn btn-ghost">Lịch sử chỉ số (meter_readings)</button>
+              <div class="card" style="margin-top:12px">
                 <h3>Người ở cùng · contract_occupants</h3>
-                <p style="font-size:0.8rem;margin-bottom:8px">contract_id + user_id (mỗi dòng một người)</p>
-                <div class="list-item" style="padding:6px 0;border-color:var(--border)"><div class="avatar" style="width:36px;height:36px"></div><div><strong style="font-size:0.85rem">Trần Văn B</strong><p style="font-size:0.75rem">users.id · roommate</p></div></div>
+                <p style="font-size:0.8rem;margin-bottom:8px">contract_id + user_id</p>
+                <div class="list-item" style="padding:6px 0;border-color:var(--border)"><div class="avatar" style="width:36px;height:36px"></div><div><strong style="font-size:0.85rem">Trần Văn B</strong><p style="font-size:0.75rem">users.id</p></div></div>
                 <div class="list-item" style="padding:6px 0;border:none"><div class="avatar" style="width:36px;height:36px"></div><div><strong style="font-size:0.85rem">Lê Thị C</strong><p style="font-size:0.75rem">users.id</p></div></div>
               </div>
-              <p style="font-size:0.7rem;color:var(--text-secondary);text-align:center">Không có end_date / giá HĐ / PDF trên ERD mới</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="device-label">Tenant · Kỳ thanh toán (billing_periods)</div>
+        <div class="device">
+          <div class="screen">
+            <div class="status-bar"></div>
+            <div class="nav-bar"><span class="back">←</span><span class="title">HĐ-2026-00142 · Kỳ</span></div>
+            <div class="content">
+              <div class="card">
+                <h3>Tháng 5/2026</h3>
+                <span class="chip chip-warning">draft</span>
+                <p style="margin-top:8px;font-size:0.8rem;color:var(--text-secondary)">GET <code style="font-size:0.65rem">/contracts/:id/billing-periods</code></p>
+              </div>
+              <div class="card">
+                <h3>Tháng 4/2026</h3>
+                <span class="chip chip-success">paid</span>
+                <p style="margin-top:8px;font-size:0.85rem"><strong>6.180.000 đ</strong> · finalized_at</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="device-label">Tenant · Chi tiết kỳ (điện · nước · tổng)</div>
+        <div class="device">
+          <div class="screen">
+            <div class="status-bar"></div>
+            <div class="nav-bar"><span class="back">←</span><span class="title">Kỳ 4/2026</span></div>
+            <div class="content">
+              <div class="card">
+                <div class="bill-row"><span>Điện (prev → curr)</span><strong>1200 → 1288</strong></div>
+                <div class="bill-row"><span>Thành tiền điện</span><strong>242.000</strong></div>
+                <div class="bill-row"><span>Nước</span><strong>85.000</strong></div>
+                <div class="bill-row"><span>internet_fee · service_fee</span><strong>150k</strong></div>
+                <div class="bill-row"><span>rent_amount</span><strong>5.500.000</strong></div>
+                <div class="bill-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:10px"><span>total_due</span><strong style="color:var(--primary)">6.180.000</strong></div>
+                <p style="margin-top:10px;font-size:0.7rem;color:var(--text-secondary)">status: finalized → paid · BillingPeriodStatus</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="device-label">Tenant · Biểu đồ (lọc điện · nước · tiền)</div>
+        <div class="device">
+          <div class="screen chart-screen">
+            <div class="status-bar"></div>
+            <div class="nav-bar"><span class="back">←</span><span class="title">Xu hướng HĐ-00142</span></div>
+            <div class="content">
+              <div class="field"><label>Kỳ xem</label><div class="input"></div></div>
+              <p style="font-size:0.72rem;color:var(--text-secondary);margin:-4px 0 10px">Nguồn: <code style="font-size:0.65rem">billing_periods</code> (amount) + <code style="font-size:0.65rem">meter_readings</code> (index)</p>
+              <div class="chart-filters" aria-label="Bộ lọc biểu đồ">
+                <button type="button" class="active" data-series="electricity">Điện</button>
+                <button type="button" class="active" data-series="water">Nước</button>
+                <button type="button" class="active" data-series="money">Tiền</button>
+              </div>
+              <div class="chart-area">
+                <div class="chart-grid">
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:38%" title="Tiền điện"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:22%" title="Tiền nước"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:72%" title="Tổng phải trả"></div>
+                    </div>
+                    <span class="chart-col-label">T1</span>
+                  </div>
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:42%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:24%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:76%"></div>
+                    </div>
+                    <span class="chart-col-label">T2</span>
+                  </div>
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:35%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:28%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:68%"></div>
+                    </div>
+                    <span class="chart-col-label">T3</span>
+                  </div>
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:55%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:30%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:92%"></div>
+                    </div>
+                    <span class="chart-col-label">T4</span>
+                  </div>
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:48%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:26%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:85%"></div>
+                    </div>
+                    <span class="chart-col-label">T5</span>
+                  </div>
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:40%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:25%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:78%"></div>
+                    </div>
+                    <span class="chart-col-label">T6</span>
+                  </div>
+                </div>
+                <div class="chart-legend">
+                  <span><i class="lg-e"></i> electricity_amount</span>
+                  <span><i class="lg-w"></i> water_amount</span>
+                  <span><i class="lg-m"></i> total_due</span>
+                </div>
+                <p class="chart-caption">Tap Điện / Nước / Tiền để ẩn-hiện cột tương ứng (mock tương tác).</p>
+              </div>
             </div>
           </div>
         </div>
@@ -491,11 +748,22 @@
                 <p>users: email · phone · status active</p>
               </div>
               <div class="card">
+                <h3>HĐ đang thuê · Phòng 302</h3>
+                <p style="margin-top:8px;font-size:0.8rem;line-height:1.5">
+                  <strong style="color:var(--text-primary)">Người đại diện ký HĐ</strong>
+                  <span style="display:block;color:var(--text-secondary);margin-top:4px">Nguyễn Thị Lan (bạn) · <code style="font-size:0.65rem">contracts.tenant_user_id</code></span>
+                </p>
+                <p style="margin-top:12px;font-size:0.8rem;line-height:1.5;border-top:1px solid var(--border);padding-top:10px">
+                  <strong style="color:var(--text-primary)">Người ở cùng</strong>
+                  <span style="display:block;color:var(--text-secondary);margin-top:4px">Trần Văn B, Lê Thị C · <code style="font-size:0.65rem">contract_occupants.user_id</code></span>
+                </p>
+              </div>
+              <div class="card">
                 <h3>KYC · tenant_profiles</h3>
                 <p style="margin-bottom:8px">citizen_id</p>
                 <div style="display:flex;gap:12px;align-items:flex-start">
                   <div style="width:88px;height:88px;background:var(--border);border-radius:12px;flex-shrink:0"></div>
-                  <p style="font-size:0.75rem;color:var(--text-secondary);margin:0">photo_url — ảnh đại diện / CCCD (theo ERD)</p>
+                  <p style="font-size:0.75rem;color:var(--text-secondary);margin:0">tenant_profiles: citizen_id · photo_url <span style="display:block;margin-top:4px;opacity:0.9">(+ issue_date / place / CCCD urls trong entity đầy đủ)</span></p>
                 </div>
               </div>
               <button type="button" class="btn btn-primary">Cập nhật</button>
@@ -540,14 +808,75 @@
                 <div class="stat"><b>5</b><small>Trống</small></div>
                 <div class="stat"><b>7</b><small>HĐ active</small></div>
               </div>
-              <p style="font-size:0.8rem;color:var(--text-secondary);margin:14px 0 8px">properties · rooms · contracts · contract_occupants</p>
+              <p style="font-size:0.8rem;color:var(--text-secondary);margin:14px 0 8px">+ meter_readings · billing_periods</p>
               <div class="card">
                 <h3>Nhắc việc</h3>
-                <p>3 phòng occupied · Cập nhật contract_occupants cho HĐ mới</p>
+                <p>2 kỳ <span class="chip chip-warning">draft</span> chưa chốt · Ghi chỉ số cuối tháng cho HĐ-001</p>
               </div>
+              <button type="button" class="btn btn-primary">Biểu đồ so sánh · điện / nước / doanh thu</button>
             </div>
             <div class="tab-bar">
               <span class="active">Tổng quan</span><span>Nhà trọ</span><span>Hợp đồng</span><span>Tôi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="device-label">Owner · Biểu đồ (filter theo hợp đồng)</div>
+        <div class="device">
+          <div class="screen chart-screen">
+            <div class="status-bar"></div>
+            <div class="nav-bar"><span class="back">←</span><span class="title">Thống kê tiện ích</span></div>
+            <div class="content">
+              <div class="field"><label>Hợp đồng / phòng</label><div class="input"></div></div>
+              <div class="chart-filters" aria-label="Bộ lọc biểu đồ">
+                <button type="button" class="active" data-series="electricity">Điện</button>
+                <button type="button" class="active" data-series="water">Nước</button>
+                <button type="button" class="active" data-series="money">Tiền</button>
+              </div>
+              <div class="chart-area">
+                <div class="chart-grid">
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:45%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:20%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:88%"></div>
+                    </div>
+                    <span class="chart-col-label">P1</span>
+                  </div>
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:52%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:24%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:95%"></div>
+                    </div>
+                    <span class="chart-col-label">P2</span>
+                  </div>
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:33%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:18%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:62%"></div>
+                    </div>
+                    <span class="chart-col-label">P3</span>
+                  </div>
+                  <div class="chart-col">
+                    <div class="chart-stacks">
+                      <div class="chart-bar-seg" data-series="electricity" style="height:61%"></div>
+                      <div class="chart-bar-seg" data-series="water" style="height:31%"></div>
+                      <div class="chart-bar-seg" data-series="money" style="height:100%"></div>
+                    </div>
+                    <span class="chart-col-label">P4</span>
+                  </div>
+                </div>
+                <div class="chart-legend">
+                  <span><i class="lg-e"></i> điện (kỳ)</span>
+                  <span><i class="lg-w"></i> nước</span>
+                  <span><i class="lg-m"></i> total_due</span>
+                </div>
+                <p class="chart-caption">So sánh nhanh các phòng / HĐ active · dữ liệu gộp từ billing_periods.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -590,6 +919,7 @@
             <div class="nav-bar"><span class="back">←</span><span class="title">Thêm nhà trọ</span></div>
             <div class="content">
               <div class="field"><label>Tên nhà trọ</label><div class="input"></div></div>
+              <div class="field"><label>address_line</label><div class="input"></div></div>
               <div class="field"><label>Quận / Phường</label><div class="input"></div></div>
               <div class="field"><label>Mô tả</label><div class="input" style="height:96px"></div></div>
               <button type="button" class="btn btn-primary">Lưu properties</button>
@@ -625,7 +955,7 @@
       </div>
 
       <div>
-        <div class="device-label">Owner · Form phòng (theo ERD)</div>
+        <div class="device-label">Owner · Form phòng (entity rooms)</div>
         <div class="device">
           <div class="screen">
             <div class="status-bar"></div>
@@ -634,7 +964,11 @@
               <div class="field"><label>room_code</label><div class="input"></div></div>
               <div class="field"><label>max_occupancy</label><div class="input"></div></div>
               <div class="field"><label>monthly_rent</label><div class="input"></div></div>
-              <div class="field"><label>status</label><div class="input"></div></div>
+              <div class="field"><label>deposit_amount</label><div class="input"></div></div>
+              <div class="field"><label>internet_fee_monthly</label><div class="input"></div></div>
+              <div class="field"><label>service_fee_monthly</label><div class="input"></div></div>
+              <div class="field"><label>amenities (JSON)</label><div class="input" style="height:56px"></div></div>
+              <div class="field"><label>status (RoomStatus)</label><div class="input"></div></div>
               <button type="button" class="btn btn-primary">Lưu rooms</button>
               <button type="button" class="btn btn-ghost">Quản lý ảnh phòng</button>
             </div>
@@ -669,22 +1003,64 @@
             <div class="content">
               <div class="card">
                 <h3>HĐ-2026-00142</h3>
-                <p>contract_no · start_date · status</p>
-                <p style="margin-top:6px;font-size:0.8rem">tenant_user_id · owner_user_id · room_id</p>
+                <p style="font-size:0.8rem">monthly_rent · deposit_amount · document_url · ContractStatus</p>
                 <span class="chip chip-success" style="margin-top:8px;display:inline-block">active</span>
               </div>
-              <div class="card">
+              <button type="button" class="btn btn-primary">Ghi chỉ số · POST meter-readings</button>
+              <button type="button" class="btn btn-ghost">Kỳ thanh toán · billing-periods</button>
+              <div class="card" style="margin-top:12px">
                 <h3>Người ở cùng · contract_occupants</h3>
                 <button type="button" class="btn btn-ghost" style="margin-top:4px">+ Thêm user_id</button>
               </div>
               <div class="card">
                 <h3>Tenant đại diện · tenant_profiles</h3>
-                <p style="font-size:0.8rem">citizen_id · photo_url</p>
+                <p style="font-size:0.8rem">citizen_id · photo_url (+ fields mở rộng trong entity)</p>
               </div>
-              <button type="button" class="btn btn-primary">Lưu hợp đồng</button>
+              <button type="button" class="btn btn-primary" style="margin-top:12px">Lưu hợp đồng</button>
             </div>
             <div class="tab-bar">
               <span>Tổng quan</span><span>Nhà trọ</span><span class="active">Hợp đồng</span><span>Tôi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="device-label">Owner · Ghi chỉ số (CreateMeterReadingDto)</div>
+        <div class="device">
+          <div class="screen">
+            <div class="status-bar"></div>
+            <div class="nav-bar"><span class="back">←</span><span class="title">Chỉ số · HĐ-00142</span></div>
+            <div class="content">
+              <div class="field"><label>utilityType · electricity | water</label><div class="input"></div></div>
+              <div class="field"><label>readingAt (YYYY-MM-DD)</label><div class="input"></div></div>
+              <div class="field"><label>indexValue</label><div class="input"></div></div>
+              <div class="field"><label>photoUrl (ảnh đồng hồ)</label><div class="input"></div></div>
+              <div class="field"><label>notes</label><div class="input" style="height:52px"></div></div>
+              <button type="button" class="btn btn-primary">POST …/meter-readings</button>
+              <p style="font-size:0.7rem;color:var(--text-secondary);margin-top:10px;text-align:center">Unique index theo contract + type + ngày (UI validate)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="device-label">Owner · Chốt kỳ (CreateBillingPeriodDto / PATCH)</div>
+        <div class="device">
+          <div class="screen">
+            <div class="status-bar"></div>
+            <div class="nav-bar"><span class="back">←</span><span class="title">Kỳ 5/2026</span></div>
+            <div class="content">
+              <div class="field"><label>periodYear · periodMonth</label><div class="input"></div></div>
+              <div class="card" style="margin-bottom:10px">
+                <h3>Điện / Nước</h3>
+                <p style="font-size:0.72rem;color:var(--text-secondary)">electricityPrevIndex → Curr · unitPrice · amount · (tương tự water…)</p>
+              </div>
+              <div class="field"><label>internetFee · serviceFee · rentAmount</label><div class="input"></div></div>
+              <div class="field"><label>totalDue</label><div class="input"></div></div>
+              <div class="field"><label>status · draft | finalized | paid</label><div class="input"></div></div>
+              <button type="button" class="btn btn-primary">PATCH finalized → finalized_at</button>
+              <button type="button" class="btn btn-ghost">POST tạo kỳ mới</button>
             </div>
           </div>
         </div>
@@ -700,6 +1076,29 @@
         var id = btn.getAttribute("data-panel");
         document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
         document.getElementById(id).classList.add("active");
+      });
+    });
+
+    function refreshChartFilters(screen) {
+      var on = {};
+      screen.querySelectorAll(".chart-filters button[data-series]").forEach(function (b) {
+        on[b.getAttribute("data-series")] = b.classList.contains("active");
+      });
+      screen.querySelectorAll(".chart-bar-seg[data-series]").forEach(function (seg) {
+        var s = seg.getAttribute("data-series");
+        seg.classList.toggle("dimmed", !on[s]);
+      });
+    }
+
+    document.querySelectorAll(".chart-screen").forEach(function (screen) {
+      refreshChartFilters(screen);
+      screen.querySelectorAll(".chart-filters button[data-series]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var activeBtns = screen.querySelectorAll(".chart-filters button[data-series].active");
+          if (btn.classList.contains("active") && activeBtns.length <= 1) return;
+          btn.classList.toggle("active");
+          refreshChartFilters(screen);
+        });
       });
     });
   </script>
